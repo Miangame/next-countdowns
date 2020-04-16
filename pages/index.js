@@ -1,204 +1,119 @@
-import Head from 'next/head'
+import React, { useState, useEffect, useCallback } from "react";
+import Router from "next/router";
+import styled from "styled-components";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
-export default function Home() {
+const timeFirstClock = 40;
+const timeSecondClock = 20;
+
+const Home = () => {
+  const [playCount1, setPlayCount1] = useState(false);
+  const [playCount2, setPlayCount2] = useState(false);
+
+  useEffect(() => {
+    document.addEventListener("keydown", keyPress, false);
+
+    return () => {
+      document.removeEventListener("keydown", keyPress, false);
+    };
+  }, []);
+
+  const keyPress = useCallback((event) => {
+    if (event.keyCode === 32) {
+      resetCounters();
+    }
+  }, []);
+
+  const renderTime = (value) => {
+    return <Time>{value}</Time>;
+  };
+
+  const startCounters = () => {
+    setPlayCount1(true);
+
+    if (playCount1 || playCount2) {
+      setPlayCount1(false);
+      setPlayCount2(false);
+    }
+  };
+
+  const resetCounters = () => {
+    window.location.href = "/";
+  };
+
   return (
-    <div className="container">
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <Container>
+      <ContainerCountdowns>
+        <CustomCountdown
+          isPlaying
+          durationSeconds={timeFirstClock}
+          colors={[["#004777", 0.33], ["#F7B801", 0.33], ["#A30000"]]}
+          renderTime={renderTime}
+          isPlaying={playCount1}
+          onComplete={() => {
+            setPlayCount2(true);
+            setPlayCount1(false);
 
-      <main>
-        <h1 className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+            return [true, timeSecondClock * 1000];
+          }}
+        />
 
-        <p className="description">
-          Get started by editing <code>pages/index.js</code>
-        </p>
+        <CustomCountdown
+          isPlaying
+          durationSeconds={timeSecondClock}
+          colors={[["#276174", 0.33], ["#33C58E", 0.33], ["#63FD88"]]}
+          renderTime={renderTime}
+          isPlaying={playCount2}
+          onComplete={() => {
+            setPlayCount1(true);
+            setPlayCount2(false);
 
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+            return [true, timeFirstClock * 1000];
+          }}
+        />
+      </ContainerCountdowns>
+      <ContainerButtons>
+        <Button onClick={() => startCounters()}>Start</Button>
+        <Button onClick={() => resetCounters()}>Reset</Button>
+      </ContainerButtons>
+    </Container>
+  );
+};
 
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+const Container = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-flow: column;
+  align-content: center;
+  justify-content: center;
+`;
 
-          <a
-            href="https://github.com/zeit/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+const ContainerCountdowns = styled.div`
+  display: flex;
+  flex-flow: row;
+`;
 
-          <a
-            href="https://zeit.co/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with ZEIT Now.
-            </p>
-          </a>
-        </div>
-      </main>
+const CustomCountdown = styled(CountdownCircleTimer)``;
 
-      <footer>
-        <a
-          href="https://zeit.co?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by <img src="/zeit.svg" alt="ZEIT Logo" />
-        </a>
-      </footer>
+const Button = styled.button`
+  width: 10%;
+  height: 80px;
+  background-color: orange;
+  color: white;
+  font-size: 30px;
+  margin-right: 20px;
+  margin-top: 50px;
+`;
 
-      <style jsx>{`
-        .container {
-          min-height: 100vh;
-          padding: 0 0.5rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
+const Time = styled.div`
+  font-size: 100px;
+`;
 
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
+const ContainerButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-flow: row;
+`;
 
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer img {
-          margin-left: 0.5rem;
-        }
-
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        a {
-          color: inherit;
-          text-decoration: none;
-        }
-
-        .title a {
-          color: #0070f3;
-          text-decoration: none;
-        }
-
-        .title a:hover,
-        .title a:focus,
-        .title a:active {
-          text-decoration: underline;
-        }
-
-        .title {
-          margin: 0;
-          line-height: 1.15;
-          font-size: 4rem;
-        }
-
-        .title,
-        .description {
-          text-align: center;
-        }
-
-        .description {
-          line-height: 1.5;
-          font-size: 1.5rem;
-        }
-
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-            DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-        }
-
-        .grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          max-width: 800px;
-          margin-top: 3rem;
-        }
-
-        .card {
-          margin: 1rem;
-          flex-basis: 45%;
-          padding: 1.5rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border: 1px solid #eaeaea;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .card:hover,
-        .card:focus,
-        .card:active {
-          color: #0070f3;
-          border-color: #0070f3;
-        }
-
-        .card h3 {
-          margin: 0 0 1rem 0;
-          font-size: 1.5rem;
-        }
-
-        .card p {
-          margin: 0;
-          font-size: 1.25rem;
-          line-height: 1.5;
-        }
-
-        @media (max-width: 600px) {
-          .grid {
-            width: 100%;
-            flex-direction: column;
-          }
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
-    </div>
-  )
-}
+export default Home;
